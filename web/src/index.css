@@ -1,8 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-bgMain: var(--bg-main);
+  --color-bgSecondary: var(--bg-secondary);
+  --color-bgCard: var(--bg-card);
+  --color-bgCardHover: var(--bg-card-hover);
+  --color-borderSoft: var(--border-soft);
+  --color-accentPrimary: var(--accent-primary);
+  --color-accentSecondary: var(--accent-secondary);
+  --color-accentSoft: var(--accent-soft);
+  --color-goldSoft: var(--gold-soft);
+  --color-textPrimary: var(--text-primary);
+  --color-textSecondary: var(--text-secondary);
+  --color-textMuted: var(--text-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+}
 
 :root {
   /* Default Theme: Dark/Night Mode */
