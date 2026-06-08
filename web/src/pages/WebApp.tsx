@@ -7,7 +7,7 @@ import {
 import { 
   StatusBar, BottomNavigation, PhoneMockup, GlassCard,
   SearchInput, VoiceButton, QuickActionChip, LoadingState,
-  SectionHeader, EmptyState
+  SectionHeader, EmptyState, PremiumIcon
 } from '../components/UI';
 import type { TabName } from '../components/UI';
 
@@ -355,35 +355,43 @@ const WebApp: React.FC<WebAppProps> = ({ theme, toggleTheme }) => {
                   <div className="grid grid-cols-2 gap-3">
                     <button 
                       onClick={() => setActiveTab('schedule')}
-                      className="p-4 bg-bgCard border border-borderSoft rounded-2xl flex flex-col gap-2 hover:bg-bgCard-hover text-left theme-transition focus:outline-none"
+                      className="p-4 bg-bgCard border border-borderSoft rounded-2xl flex flex-col gap-2.5 hover:bg-bgCard-hover text-left theme-transition focus:outline-none group"
                     >
-                      <Calendar className="w-5 h-5 text-accentPrimary" />
-                      <span className="font-bold text-xs text-textPrimary">Расписание</span>
-                      <span className="text-[9px] text-textMuted">Пары на сегодня/завтра</span>
+                      <PremiumIcon icon={Calendar} variant="primary" size={18} className="w-9 h-9 p-0" />
+                      <div>
+                        <span className="font-bold text-xs text-textPrimary block">Расписание</span>
+                        <span className="text-[9px] text-textMuted block mt-0.5">Пары на сегодня/завтра</span>
+                      </div>
                     </button>
                     <button 
                       onClick={() => setActiveTab('search')}
-                      className="p-4 bg-bgCard border border-borderSoft rounded-2xl flex flex-col gap-2 hover:bg-bgCard-hover text-left theme-transition focus:outline-none"
+                      className="p-4 bg-bgCard border border-borderSoft rounded-2xl flex flex-col gap-2.5 hover:bg-bgCard-hover text-left theme-transition focus:outline-none group"
                     >
-                      <MapPin className="w-5 h-5 text-accentPrimary" />
-                      <span className="font-bold text-xs text-textPrimary">Корпуса</span>
-                      <span className="text-[9px] text-textMuted">Схема прохода и карта</span>
+                      <PremiumIcon icon={MapPin} variant="gold" size={18} className="w-9 h-9 p-0" />
+                      <div>
+                        <span className="font-bold text-xs text-textPrimary block">Корпуса</span>
+                        <span className="text-[9px] text-textMuted block mt-0.5">Схема прохода и карта</span>
+                      </div>
                     </button>
                     <button 
                       onClick={() => handleSendQuery('Кто преподаватели')}
-                      className="p-4 bg-bgCard border border-borderSoft rounded-2xl flex flex-col gap-2 hover:bg-bgCard-hover text-left theme-transition focus:outline-none"
+                      className="p-4 bg-bgCard border border-borderSoft rounded-2xl flex flex-col gap-2.5 hover:bg-bgCard-hover text-left theme-transition focus:outline-none group"
                     >
-                      <User className="w-5 h-5 text-accentPrimary" />
-                      <span className="font-bold text-xs text-textPrimary">Преподаватели</span>
-                      <span className="text-[9px] text-textMuted">Контакты и кафедры</span>
+                      <PremiumIcon icon={User} variant="primary" size={18} className="w-9 h-9 p-0" />
+                      <div>
+                        <span className="font-bold text-xs text-textPrimary block">Преподаватели</span>
+                        <span className="text-[9px] text-textMuted block mt-0.5">Контакты и кафедры</span>
+                      </div>
                     </button>
                     <button 
                       onClick={() => setActiveTab('lectures')}
-                      className="p-4 bg-bgCard border border-borderSoft rounded-2xl flex flex-col gap-2 hover:bg-bgCard-hover text-left theme-transition focus:outline-none"
+                      className="p-4 bg-bgCard border border-borderSoft rounded-2xl flex flex-col gap-2.5 hover:bg-bgCard-hover text-left theme-transition focus:outline-none group"
                     >
-                      <BookOpen className="w-5 h-5 text-accentPrimary" />
-                      <span className="font-bold text-xs text-textPrimary">Лекции</span>
-                      <span className="text-[9px] text-textMuted">Видеозаписи лекций</span>
+                      <PremiumIcon icon={BookOpen} variant="gold" size={18} className="w-9 h-9 p-0" />
+                      <div>
+                        <span className="font-bold text-xs text-textPrimary block">Лекции</span>
+                        <span className="text-[9px] text-textMuted block mt-0.5">Видеозаписи лекций</span>
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -462,7 +470,8 @@ const WebApp: React.FC<WebAppProps> = ({ theme, toggleTheme }) => {
                           className="flex items-center justify-between p-3.5 bg-bgCard hover:bg-bgCard-hover border border-borderSoft rounded-2xl theme-transition text-left"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-accentSoft flex items-center justify-center text-accentPrimary font-bold text-xs flex-shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-accentPrimary/20 to-goldSoft/10 border border-accentPrimary/20 flex items-center justify-center text-accentPrimary font-extrabold text-xs flex-shrink-0 shadow-sm relative overflow-hidden">
+                              <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>
                               {les.subject.slice(0, 2).toUpperCase()}
                             </div>
                             <div>
@@ -554,9 +563,7 @@ const WebApp: React.FC<WebAppProps> = ({ theme, toggleTheme }) => {
                           className="flex items-center justify-between p-3.5 bg-bgCard hover:bg-bgCard-hover border border-borderSoft rounded-2xl theme-transition cursor-pointer text-left"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-accentSoft flex items-center justify-center text-accentPrimary flex-shrink-0">
-                              <MapPin className="w-4 h-4" />
-                            </div>
+                            <PremiumIcon icon={MapPin} variant="gold" size={16} className="w-10 h-10 p-0 flex-shrink-0" />
                             <div>
                               <h5 className="font-bold text-xs text-textPrimary">{b.number} корпус — {b.name}</h5>
                               <p className="text-[10px] text-textMuted mt-0.5">{b.address}</p>
@@ -576,12 +583,10 @@ const WebApp: React.FC<WebAppProps> = ({ theme, toggleTheme }) => {
                       <div 
                         key={idx}
                         onClick={() => handleSendQuery(`где ${item.name}`)}
-                        className="flex items-center justify-between p-3.5 bg-bgCard hover:bg-bgCard-hover border border-borderSoft rounded-2xl theme-transition cursor-pointer text-left"
+                        className="flex items-center justify-between p-3.5 bg-bgCard hover:bg-bgCard-hover border border-borderSoft rounded-2xl theme-transition cursor-pointer text-left group"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-bgSecondary flex items-center justify-center text-textSecondary flex-shrink-0">
-                            <Compass className="w-4 h-4" />
-                          </div>
+                          <PremiumIcon icon={Compass} variant="neutral" size={16} className="w-10 h-10 p-0 flex-shrink-0" />
                           <div>
                             <h5 className="font-bold text-xs text-textPrimary">{item.name}</h5>
                             <p className="text-[10px] text-textMuted mt-0.5">{item.desc} · {item.walk}</p>

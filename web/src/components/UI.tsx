@@ -131,16 +131,16 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({ activeTab, s
             onClick={() => setActiveTab(tab.name)}
             className={`relative flex flex-col items-center justify-center w-12 h-12 rounded-full focus:outline-none transition-all duration-300 ${
               isActive 
-                ? 'bg-accentPrimary text-white shadow-lg glow-orange scale-110' 
+                ? 'bg-gradient-to-tr from-accentPrimary/25 to-goldSoft/10 border border-accentPrimary/30 text-white shadow-[0_0_12px_rgba(255,106,42,0.25)] scale-110' 
                 : 'text-textSecondary hover:text-textPrimary hover:bg-white/5'
             }`}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="w-5 h-5" stroke={isActive ? 'url(#accent-grad)' : 'currentColor'} strokeWidth={isActive ? 2.4 : 2} />
             <span className={`text-[9px] font-medium mt-0.5 ${isActive ? 'hidden' : 'block'}`}>
               {tab.label}
             </span>
             {isActive && (
-              <span className="absolute -bottom-1.5 w-1 h-1 bg-white rounded-full"></span>
+              <span className="absolute -bottom-1 w-1.5 h-1.5 bg-accentPrimary rounded-full shadow-[0_0_8px_#FF6A2A]"></span>
             )}
           </button>
         );
@@ -324,3 +324,84 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ message, description }) 
     </div>
   );
 };
+
+// ==========================================
+// Global SVG Gradients Definitions
+// ==========================================
+export const GlobalSVGDefs: React.FC = () => {
+  return (
+    <svg width="0" height="0" className="absolute pointer-events-none w-0 h-0" style={{ position: 'absolute', width: 0, height: 0 }}>
+      <defs>
+        <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FF6A2A" />
+          <stop offset="100%" stopColor="#FF9F6A" />
+        </linearGradient>
+        <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#C9A45C" />
+          <stop offset="100%" stopColor="#E5C180" />
+        </linearGradient>
+        <linearGradient id="danger-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FF5C5C" />
+          <stop offset="100%" stopColor="#FF8E8E" />
+        </linearGradient>
+        <linearGradient id="success-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#23C46E" />
+          <stop offset="100%" stopColor="#5CE598" />
+        </linearGradient>
+        <linearGradient id="neutral-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#A99F97" />
+          <stop offset="100%" stopColor="#F4EFEA" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+
+// ==========================================
+// PremiumIcon Component
+// ==========================================
+interface PremiumIconProps {
+  icon: React.ComponentType<any>;
+  className?: string;
+  size?: number;
+  variant?: 'primary' | 'gold' | 'danger' | 'success' | 'neutral';
+}
+
+export const PremiumIcon: React.FC<PremiumIconProps> = ({ 
+  icon: Icon, 
+  className = '', 
+  size = 20, 
+  variant = 'primary' 
+}) => {
+  let gradId = 'accent-grad';
+  let containerStyles = 'bg-accentSoft border-accentPrimary/25 text-accentPrimary shadow-[0_0_12px_rgba(255,106,42,0.15)]';
+  
+  if (variant === 'gold') {
+    gradId = 'gold-grad';
+    containerStyles = 'bg-amber-500/10 border-amber-500/20 text-[#C9A45C] shadow-[0_0_12px_rgba(201,164,92,0.12)]';
+  } else if (variant === 'danger') {
+    gradId = 'danger-grad';
+    containerStyles = 'bg-red-500/10 border-red-500/20 text-[#FF5C5C] shadow-[0_0_12px_rgba(255,92,92,0.12)]';
+  } else if (variant === 'success') {
+    gradId = 'success-grad';
+    containerStyles = 'bg-green-500/10 border-green-500/20 text-[#23C46E] shadow-[0_0_12px_rgba(35,196,110,0.12)]';
+  } else if (variant === 'neutral') {
+    gradId = 'neutral-grad';
+    containerStyles = 'bg-white/5 border-white/10 text-textSecondary shadow-none';
+  }
+
+  return (
+    <div className={`relative flex items-center justify-center p-2.5 rounded-xl border backdrop-blur-[4px] transition-all duration-300 hover:scale-105 group-hover:border-accentPrimary/40 ${containerStyles} ${className}`}>
+      {/* Inner reflection curve */}
+      <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/10 to-transparent rounded-t-xl pointer-events-none"></div>
+      <Icon 
+        size={size} 
+        stroke={`url(#${gradId})`} 
+        strokeWidth={2.2} 
+        style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.2))' }}
+        className="relative z-10"
+      />
+    </div>
+  );
+};
+

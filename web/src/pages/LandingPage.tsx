@@ -4,7 +4,7 @@ import {
   Calendar, MapPin, User, BookOpen, Mic, Send, 
   ArrowRight, ShieldAlert, Sparkles, CheckCircle, ExternalLink 
 } from 'lucide-react';
-import { ThemeToggle, GlassCard } from '../components/UI';
+import { ThemeToggle, GlassCard, PremiumIcon } from '../components/UI';
 
 interface LandingPageProps {
   theme: 'light' | 'dark';
@@ -179,30 +179,24 @@ const LandingPage: React.FC<LandingPageProps> = ({ theme, toggleTheme }) => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <GlassCard className="flex flex-col gap-4 text-left">
-            <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
-              <ShieldAlert className="w-6 h-6" />
-            </div>
+          <GlassCard className="flex flex-col gap-4 text-left group">
+            <PremiumIcon icon={Calendar} variant="danger" size={24} className="w-12 h-12 rounded-2xl" />
             <h3 className="font-bold text-lg text-textPrimary">Хаос в расписании</h3>
             <p className="text-sm text-textSecondary leading-relaxed">
               Расписание лежит на сайте вуза, изменения присылают в чаты старосты, а замены вывешивают на стенде. Свести это воедино — квест.
             </p>
           </GlassCard>
 
-          <GlassCard className="flex flex-col gap-4 text-left">
-            <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
-              <ShieldAlert className="w-6 h-6" />
-            </div>
+          <GlassCard className="flex flex-col gap-4 text-left group">
+            <PremiumIcon icon={BookOpen} variant="danger" size={24} className="w-12 h-12 rounded-2xl" />
             <h3 className="font-bold text-lg text-textPrimary">Потерянные лекции</h3>
             <p className="text-sm text-textSecondary leading-relaxed">
               Записи лекций и учебные материалы сбрасывают в общую кучу в облаке или теряют в километрах переписок групповых чатов.
             </p>
           </GlassCard>
 
-          <GlassCard className="flex flex-col gap-4 text-left">
-            <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
-              <ShieldAlert className="w-6 h-6" />
-            </div>
+          <GlassCard className="flex flex-col gap-4 text-left group">
+            <PremiumIcon icon={MapPin} variant="danger" size={24} className="w-12 h-12 rounded-2xl" />
             <h3 className="font-bold text-lg text-textPrimary">Неизвестность в корпусах</h3>
             <p className="text-sm text-textSecondary leading-relaxed">
               Названия аудиторий вроде «ауд. 305» не объясняют, в каком корпусе она находится, на каком этаже и как туда быстрее дойти со двора.
@@ -265,19 +259,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ theme, toggleTheme }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
           {[
-            { icon: Calendar, title: 'Расписание', desc: 'Просмотр пар на сегодня, завтра или неделю с автоматическим отслеживанием замен.' },
-            { icon: MapPin, title: 'Корпуса и аудитории', desc: 'Быстрый поиск расположения аудитории, этажа и схемы прохода между корпусами.' },
-            { icon: User, title: 'Преподаватели', desc: 'Информация о том, кто ведёт предмет, с какой он кафедры и где у него ближайшая пара.' },
-            { icon: BookOpen, title: 'Записи лекций', desc: 'Удобный архив прошедших лекций, распределенный по темам и предметам с конспектами.' },
-            { icon: ShieldAlert, title: 'Геолокация с разрешения', desc: 'Поиск местоположения одногруппников на карте внутри университета с гибким доступом.' },
-            { icon: Mic, title: 'Голосовые вопросы', desc: 'Возможность надиктовать вопрос голосом, если неудобно вводить текст на ходу.' },
+            { icon: Calendar, variant: 'primary', title: 'Расписание', desc: 'Просмотр пар на сегодня, завтра или неделю с автоматическим отслеживанием замен.' },
+            { icon: MapPin, variant: 'gold', title: 'Корпуса и аудитории', desc: 'Быстрый поиск расположения аудитории, этажа и схемы прохода между корпусами.' },
+            { icon: User, variant: 'primary', title: 'Преподаватели', desc: 'Информация о том, кто ведёт предмет, с какой он кафедры и где у него ближайшая пара.' },
+            { icon: BookOpen, variant: 'gold', title: 'Записи лекций', desc: 'Удобный архив прошедших лекций, распределенный по темам и предметам с конспектами.' },
+            { icon: ShieldAlert, variant: 'danger', title: 'Геолокация с разрешения', desc: 'Поиск местоположения одногруппников на карте внутри университета с гибким доступом.' },
+            { icon: Mic, variant: 'success', title: 'Голосовые вопросы', desc: 'Возможность надиктовать вопрос голосом, если неудобно вводить текст на ходу.' },
           ].map((feat, index) => {
-            const Icon = feat.icon;
             return (
-              <GlassCard key={index} className="flex gap-4">
-                <div className="w-12 h-12 rounded-full bg-accentSoft border border-accentPrimary/10 flex items-center justify-center text-accentPrimary flex-shrink-0">
-                  <Icon className="w-5 h-5" />
-                </div>
+              <GlassCard key={index} className="flex gap-4 group">
+                <PremiumIcon icon={feat.icon} variant={feat.variant as any} size={20} className="w-12 h-12 rounded-2xl flex-shrink-0" />
                 <div>
                   <h4 className="font-bold text-textPrimary text-base mb-1">{feat.title}</h4>
                   <p className="text-xs text-textSecondary leading-relaxed">{feat.desc}</p>

@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import WebApp from './pages/WebApp';
 import AdminPanel from './pages/AdminPanel';
+import { GlobalSVGDefs } from './components/UI';
 
 function App() {
   // Read initial theme from localStorage or fallback to default 'dark'
@@ -22,6 +23,7 @@ function App() {
 
   return (
     <HashRouter>
+      <GlobalSVGDefs />
       <Routes>
         <Route path="/" element={<LandingPage theme={theme} toggleTheme={toggleTheme} />} />
         <Route path="/app" element={<WebApp theme={theme} toggleTheme={toggleTheme} />} />
