@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Default Theme: Dark/Night Mode */
+  --bg-main: #1B1512;
+  --bg-secondary: #201813;
+  --bg-card: rgba(45, 35, 30, 0.72);
+  --bg-card-hover: rgba(58, 44, 37, 0.82);
+  --border-soft: rgba(255, 255, 255, 0.08);
+
+  --accent-primary: #FF6A2A;
+  --accent-secondary: #FF8A4C;
+  --accent-soft: rgba(255, 106, 42, 0.16);
+  --gold-soft: #C9A45C;
+
+  --text-primary: #F4EFEA;
+  --text-secondary: #A99F97;
+  --text-muted: #756B65;
+
+  --success: #23C46E;
+  --warning: #FFB547;
+  --error: #FF5C5C;
+}
+
+:root[data-theme="dark"] {
+  --bg-main: #1B1512;
+  --bg-secondary: #201813;
+  --bg-card: rgba(45, 35, 30, 0.72);
+  --bg-card-hover: rgba(58, 44, 37, 0.82);
+  --border-soft: rgba(255, 255, 255, 0.08);
+
+  --accent-primary: #FF6A2A;
+  --accent-secondary: #FF8A4C;
+  --accent-soft: rgba(255, 106, 42, 0.16);
+  --gold-soft: #C9A45C;
+
+  --text-primary: #F4EFEA;
+  --text-secondary: #A99F97;
+  --text-muted: #756B65;
+
+  --success: #23C46E;
+  --warning: #FFB547;
+  --error: #FF5C5C;
+}
+
+:root[data-theme="light"] {
+  --bg-main: #F7F1EA;
+  --bg-secondary: #EFE3D7;
+  --bg-card: rgba(255, 255, 255, 0.72);
+  --bg-card-hover: rgba(255, 250, 245, 0.9);
+  --border-soft: rgba(80, 50, 35, 0.12);
+
+  --accent-primary: #FF6A2A;
+  --accent-secondary: #D95A22;
+  --accent-soft: rgba(255, 106, 42, 0.14);
+  --gold-soft: #B8873D;
+
+  --text-primary: #231A15;
+  --text-secondary: #6E5D52;
+  --text-muted: #9B8B80;
+
+  --success: #159A55;
+  --warning: #C98713;
+  --error: #D94646;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Background Gradients and Effects */
+.bg-glow-dark {
+  background: 
+    radial-gradient(circle at 10% 10%, rgba(255, 106, 42, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 90% 15%, rgba(201, 164, 92, 0.08) 0%, transparent 40%),
+    linear-gradient(to bottom, #1B1512 0%, #0D0A08 100%);
+}
+
+.bg-glow-light {
+  background: 
+    radial-gradient(circle at 15% 10%, rgba(255, 106, 42, 0.09) 0%, transparent 40%),
+    radial-gradient(circle at 85% 12%, rgba(184, 135, 61, 0.07) 0%, transparent 35%),
+    linear-gradient(to bottom, #F7F1EA 0%, #EFE3D7 100%);
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease-in-out;
+}
+
+.glass-panel:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(255, 106, 42, 0.15);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-soft);
+  transition: all 0.2s ease;
+}
+
+.glass-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Noise overlay effect */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  content: "";
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3联%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-soft);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* Glow animations */
+.glow-orange {
+  box-shadow: 0 0 15px 2px rgba(255, 106, 42, 0.35);
+}
+
+.glow-orange-soft {
+  box-shadow: 0 0 10px 0 rgba(255, 106, 42, 0.15);
+}
+
+/* Theme switch transitions for all color changing elements */
+.theme-transition {
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
