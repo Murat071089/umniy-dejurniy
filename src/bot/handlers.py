@@ -1,8 +1,11 @@
 """
 Обработчики команд и сообщений Telegram-бота.
+Все обработчики защищены от молчаливых падений — при любой ошибке
+пользователь получит сообщение об ошибке вместо тишины.
 """
 
 import logging
+import functools
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
@@ -51,6 +54,51 @@ logger = logging.getLogger(__name__)
 # Создаём роутер
 router = Router()
 
+ERROR_MESSAGE = "⚠️ Произошла ошибка. Попробуй ещё раз или выбери действие из меню."
+
+
+# ==========================================
+# ДЕКОРАТОРЫ ЗАЩИТЫ ОТ МОЛЧАЛИВЫХ ПАДЕНИЙ
+# ==========================================
+
+
+def safe_message_handler(func):
+    """Декоратор: оборачивает обработчик сообщений в try/except.
+    При любой ошибке — отправляет пользователю сообщение об ошибке."""
+    @functools.wraps(func)
+    async def wrapper(message: Message, *args, **kwargs):
+        try:
+            return await func(message, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"Ошибка в {func.__name__}: {e}", exc_info=True)
+            try:
+                await message.answer(ERROR_MESSAGE, reply_markup=main_menu_keyboard())
+            except Exception:
+                pass  # Не можем отправить даже ошибку — сеть недоступна
+    return wrapper
+
+
+def safe_callback_handler(func):
+    """Декоратор: оборачивает callback-обработчик в try/except.
+    При любой ошибке — отвечает пользователю и показывает сообщение."""
+    @functools.wraps(func)
+    async def wrapper(callback: CallbackQuery, *args, **kwargs):
+        try:
+            return await func(callback, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"Ошибка в {func.__name__}: {e}", exc_info=True)
+            try:
+                await callback.message.edit_text(
+                    ERROR_MESSAGE, reply_markup=main_menu_keyboard()
+                )
+            except Exception:
+                pass
+            try:
+                await callback.answer("⚠️ Ошибка")
+            except Exception:
+                pass
+    return wrapper
+
 
 # ==========================================
 # КОМАНДЫ
@@ -58,6 +106,7 @@ router = Router()
 
 
 @router.message(Command("start"))
+@safe_message_handler
 async def cmd_start(message: Message) -> None:
     """Обработчик команды /start."""
     user = message.from_user
@@ -75,6 +124,7 @@ async def cmd_start(message: Message) -> None:
 
 
 @router.message(Command("help"))
+@safe_message_handler
 async def cmd_help(message: Message) -> None:
     """Обработчик команды /help."""
     await message.answer(
@@ -85,6 +135,7 @@ async def cmd_help(message: Message) -> None:
 
 
 @router.message(Command("schedule"))
+@safe_message_handler
 async def cmd_schedule(message: Message) -> None:
     """Обработчик команды /schedule."""
     await message.answer(
@@ -94,6 +145,7 @@ async def cmd_schedule(message: Message) -> None:
 
 
 @router.message(Command("buildings"))
+@safe_message_handler
 async def cmd_buildings(message: Message) -> None:
     """Обработчик команды /buildings."""
     text = await get_all_buildings()
@@ -101,6 +153,7 @@ async def cmd_buildings(message: Message) -> None:
 
 
 @router.message(Command("teachers"))
+@safe_message_handler
 async def cmd_teachers(message: Message) -> None:
     """Обработчик команды /teachers."""
     text = await get_all_teachers()
@@ -108,6 +161,7 @@ async def cmd_teachers(message: Message) -> None:
 
 
 @router.message(Command("records"))
+@safe_message_handler
 async def cmd_records(message: Message) -> None:
     """Обработчик команды /records."""
     text = await get_all_recordings()
@@ -115,6 +169,7 @@ async def cmd_records(message: Message) -> None:
 
 
 @router.message(Command("profile"))
+@safe_message_handler
 async def cmd_profile(message: Message) -> None:
     """Обработчик команды /profile."""
     user = message.from_user
@@ -143,6 +198,7 @@ async def cmd_profile(message: Message) -> None:
 
 
 @router.message(F.voice)
+@safe_message_handler
 async def handle_voice(message: Message) -> None:
     """Обработчик голосовых сообщений — заглушка для MVP."""
     await message.answer(
@@ -157,6 +213,7 @@ async def handle_voice(message: Message) -> None:
 
 
 @router.message(F.text)
+@safe_message_handler
 async def handle_text(message: Message) -> None:
     """Обработчик текстовых сообщений — основная NLP-логика."""
     text = message.text
@@ -179,83 +236,75 @@ async def handle_text(message: Message) -> None:
         group = "ИС-21"
 
     # Маршрутизация по намерению
-    try:
-        if intent.intent == "schedule_today":
-            response = await get_schedule_today(group)
-            await message.answer(response, reply_markup=schedule_keyboard())
+    if intent.intent == "schedule_today":
+        response = await get_schedule_today(group)
+        await message.answer(response, reply_markup=schedule_keyboard())
 
-        elif intent.intent == "schedule_tomorrow":
-            response = await get_schedule_tomorrow(group)
-            await message.answer(response, reply_markup=schedule_keyboard())
+    elif intent.intent == "schedule_tomorrow":
+        response = await get_schedule_tomorrow(group)
+        await message.answer(response, reply_markup=schedule_keyboard())
 
-        elif intent.intent == "next_lesson":
-            response = await get_next_lesson(group)
-            await message.answer(response, reply_markup=schedule_keyboard())
+    elif intent.intent == "next_lesson":
+        response = await get_next_lesson(group)
+        await message.answer(response, reply_markup=schedule_keyboard())
 
-        elif intent.intent == "find_building":
-            if intent.building_number:
-                response = await find_building(intent.building_number)
-                await message.answer(
-                    response,
-                    reply_markup=building_keyboard(intent.building_number),
-                )
-            else:
-                response = await get_all_buildings()
-                await message.answer(response, reply_markup=buildings_list_keyboard())
-
-        elif intent.intent == "find_room":
-            if intent.room_number:
-                response = await find_room(intent.room_number)
-                await message.answer(response, reply_markup=back_to_menu_keyboard())
-            else:
-                await message.answer(ROOM_PROMPT, reply_markup=back_to_menu_keyboard())
-
-        elif intent.intent == "find_place":
-            if intent.place_name and intent.place_name in PLACE_INFO:
-                response = PLACE_INFO[intent.place_name]
-                await message.answer(
-                    f"📍 {response}",
-                    reply_markup=back_to_menu_keyboard(),
-                )
-            else:
-                await message.answer(
-                    "📍 Не нашёл это место. Попробуй написать точнее.",
-                    reply_markup=main_menu_keyboard(),
-                )
-
-        elif intent.intent == "find_teacher":
-            if intent.subject:
-                response = await find_teacher_by_subject(intent.subject, group)
-                await message.answer(response, reply_markup=back_to_menu_keyboard())
-            else:
-                response = await get_all_teachers()
-                await message.answer(response, reply_markup=back_to_menu_keyboard())
-
-        elif intent.intent == "lecture_recording":
-            response = await find_recording(intent.subject)
-            # Пытаемся извлечь URL для кнопки
-            url = None
-            if "Смотреть:" in response:
-                url = response.split("Смотреть: ")[-1].strip()
-            await message.answer(response, reply_markup=records_keyboard(url))
-
-        elif intent.intent == "student_location":
-            if intent.student_name:
-                response = await find_student_location(intent.student_name)
-                await message.answer(response, reply_markup=back_to_menu_keyboard())
-            else:
-                await message.answer(LOCATION_PROMPT, reply_markup=back_to_menu_keyboard())
-
+    elif intent.intent == "find_building":
+        if intent.building_number:
+            response = await find_building(intent.building_number)
+            await message.answer(
+                response,
+                reply_markup=building_keyboard(intent.building_number),
+            )
         else:
-            # unknown
-            await message.answer(UNKNOWN_INTENT, reply_markup=main_menu_keyboard())
+            response = await get_all_buildings()
+            await message.answer(response, reply_markup=buildings_list_keyboard())
 
-    except Exception as e:
-        logger.error(f"Ошибка при обработке сообщения: {e}", exc_info=True)
-        await message.answer(
-            "⚠️ Произошла ошибка. Попробуй ещё раз или выбери действие из меню.",
-            reply_markup=main_menu_keyboard(),
-        )
+    elif intent.intent == "find_room":
+        if intent.room_number:
+            response = await find_room(intent.room_number)
+            await message.answer(response, reply_markup=back_to_menu_keyboard())
+        else:
+            await message.answer(ROOM_PROMPT, reply_markup=back_to_menu_keyboard())
+
+    elif intent.intent == "find_place":
+        if intent.place_name and intent.place_name in PLACE_INFO:
+            response = PLACE_INFO[intent.place_name]
+            await message.answer(
+                f"📍 {response}",
+                reply_markup=back_to_menu_keyboard(),
+            )
+        else:
+            await message.answer(
+                "📍 Не нашёл это место. Попробуй написать точнее.",
+                reply_markup=main_menu_keyboard(),
+            )
+
+    elif intent.intent == "find_teacher":
+        if intent.subject:
+            response = await find_teacher_by_subject(intent.subject, group)
+            await message.answer(response, reply_markup=back_to_menu_keyboard())
+        else:
+            response = await get_all_teachers()
+            await message.answer(response, reply_markup=back_to_menu_keyboard())
+
+    elif intent.intent == "lecture_recording":
+        response = await find_recording(intent.subject)
+        # Пытаемся извлечь URL для кнопки
+        url = None
+        if "Смотреть:" in response:
+            url = response.split("Смотреть: ")[-1].strip()
+        await message.answer(response, reply_markup=records_keyboard(url))
+
+    elif intent.intent == "student_location":
+        if intent.student_name:
+            response = await find_student_location(intent.student_name)
+            await message.answer(response, reply_markup=back_to_menu_keyboard())
+        else:
+            await message.answer(LOCATION_PROMPT, reply_markup=back_to_menu_keyboard())
+
+    else:
+        # unknown
+        await message.answer(UNKNOWN_INTENT, reply_markup=main_menu_keyboard())
 
 
 # ==========================================
@@ -264,6 +313,7 @@ async def handle_text(message: Message) -> None:
 
 
 @router.callback_query(F.data == "back_to_menu")
+@safe_callback_handler
 async def cb_back_to_menu(callback: CallbackQuery) -> None:
     """Вернуться в главное меню."""
     await callback.message.edit_text(
@@ -274,6 +324,7 @@ async def cb_back_to_menu(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "menu_schedule")
+@safe_callback_handler
 async def cb_menu_schedule(callback: CallbackQuery) -> None:
     """Меню расписания."""
     await callback.message.edit_text(
@@ -284,6 +335,7 @@ async def cb_menu_schedule(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "schedule_today")
+@safe_callback_handler
 async def cb_schedule_today(callback: CallbackQuery) -> None:
     """Расписание на сегодня."""
     user = callback.from_user
@@ -294,6 +346,7 @@ async def cb_schedule_today(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "schedule_tomorrow")
+@safe_callback_handler
 async def cb_schedule_tomorrow(callback: CallbackQuery) -> None:
     """Расписание на завтра."""
     user = callback.from_user
@@ -304,6 +357,7 @@ async def cb_schedule_tomorrow(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "schedule_next")
+@safe_callback_handler
 async def cb_schedule_next(callback: CallbackQuery) -> None:
     """Следующая пара."""
     user = callback.from_user
@@ -314,6 +368,7 @@ async def cb_schedule_next(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "menu_buildings")
+@safe_callback_handler
 async def cb_menu_buildings(callback: CallbackQuery) -> None:
     """Список корпусов."""
     text = await get_all_buildings()
@@ -322,6 +377,7 @@ async def cb_menu_buildings(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data.startswith("building_"))
+@safe_callback_handler
 async def cb_building_detail(callback: CallbackQuery) -> None:
     """Информация о конкретном корпусе."""
     number = int(callback.data.split("_")[1])
@@ -334,6 +390,7 @@ async def cb_building_detail(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "find_room_prompt")
+@safe_callback_handler
 async def cb_find_room_prompt(callback: CallbackQuery) -> None:
     """Запрос номера аудитории."""
     await callback.message.edit_text(ROOM_PROMPT, reply_markup=back_to_menu_keyboard())
@@ -341,6 +398,7 @@ async def cb_find_room_prompt(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "menu_teachers")
+@safe_callback_handler
 async def cb_menu_teachers(callback: CallbackQuery) -> None:
     """Список преподавателей."""
     text = await get_all_teachers()
@@ -349,6 +407,7 @@ async def cb_menu_teachers(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "menu_records")
+@safe_callback_handler
 async def cb_menu_records(callback: CallbackQuery) -> None:
     """Записи лекций."""
     text = await get_all_recordings()
@@ -357,6 +416,7 @@ async def cb_menu_records(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "find_record_prompt")
+@safe_callback_handler
 async def cb_find_record_prompt(callback: CallbackQuery) -> None:
     """Запрос предмета для записи лекции."""
     await callback.message.edit_text(RECORD_PROMPT, reply_markup=back_to_menu_keyboard())
@@ -364,6 +424,7 @@ async def cb_find_record_prompt(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "menu_location")
+@safe_callback_handler
 async def cb_menu_location(callback: CallbackQuery) -> None:
     """Поиск студента."""
     await callback.message.edit_text(LOCATION_PROMPT, reply_markup=back_to_menu_keyboard())
@@ -371,6 +432,7 @@ async def cb_menu_location(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "menu_help")
+@safe_callback_handler
 async def cb_menu_help(callback: CallbackQuery) -> None:
     """Справка."""
     await callback.message.edit_text(
@@ -382,6 +444,7 @@ async def cb_menu_help(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "menu_profile")
+@safe_callback_handler
 async def cb_menu_profile(callback: CallbackQuery) -> None:
     """Профиль."""
     user = callback.from_user
@@ -404,6 +467,7 @@ async def cb_menu_profile(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "location_on")
+@safe_callback_handler
 async def cb_location_on(callback: CallbackQuery) -> None:
     """Включить геолокацию."""
     user = callback.from_user
@@ -417,6 +481,7 @@ async def cb_location_on(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "location_off")
+@safe_callback_handler
 async def cb_location_off(callback: CallbackQuery) -> None:
     """Выключить геолокацию."""
     user = callback.from_user
@@ -430,6 +495,7 @@ async def cb_location_off(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == "change_group_prompt")
+@safe_callback_handler
 async def cb_change_group_prompt(callback: CallbackQuery) -> None:
     """Выбор группы."""
     await callback.message.edit_text(
@@ -440,6 +506,7 @@ async def cb_change_group_prompt(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data.startswith("set_group_"))
+@safe_callback_handler
 async def cb_set_group(callback: CallbackQuery) -> None:
     """Установить группу."""
     group_name = callback.data.replace("set_group_", "")

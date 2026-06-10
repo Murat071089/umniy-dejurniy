@@ -1,0 +1,36 @@
+services:
+  # Telegram-бот (background worker — работает всё время)
+  - type: worker
+    name: smart-duty-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false  # Нужно указать вручную на Render
+      - key: DEFAULT_GROUP
+        value: ИС-21
+      - key: DB_PATH
+        value: /opt/render/project/data/smart_duty.db
+    disk:
+      name: bot-data
+      mountPath: /opt/render/project/data
+      sizeGB: 1
+
+  # FastAPI API-сервер (web service)
+  - type: web
+    name: smart-duty-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.api.app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: DEFAULT_GROUP
+        value: ИС-21
+      - key: DB_PATH
+        value: /opt/render/project/data/smart_duty.db
+    disk:
+      name: api-data
+      mountPath: /opt/render/project/data
+      sizeGB: 1

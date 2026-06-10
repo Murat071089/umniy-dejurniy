@@ -1,13 +1,13 @@
-"""
-Конфигурация приложения.
-Загружает переменные окружения из файла .env.
-"""
-
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Загружаем .env файл
-load_dotenv()
+# Путь к корню проекта
+BASE_DIR = Path(__file__).resolve().parent.parent
+env_path = BASE_DIR / ".env"
+
+# Загружаем .env файл по абсолютному пути
+load_dotenv(dotenv_path=env_path)
 
 
 class Config:
@@ -19,8 +19,11 @@ class Config:
     # Группа по умолчанию
     DEFAULT_GROUP: str = os.getenv("DEFAULT_GROUP", "ИС-21")
 
-    # Путь к файлу базы данных
-    DB_PATH: str = os.getenv("DB_PATH", "smart_duty.db")
+    # Путь к файлу базы данных (всегда приводим к абсолютному относительно корня проекта)
+    _db_path = os.getenv("DB_PATH", "smart_duty.db")
+    DB_PATH: str = (
+        _db_path if os.path.isabs(_db_path) else str(BASE_DIR / _db_path)
+    )
 
     @classmethod
     def validate(cls) -> None:

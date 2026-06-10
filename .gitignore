@@ -12,15 +12,26 @@ __pycache__/
 env/
 venv/
 
+# Logs
+logs/
+*.log
+
 # Node / Frontend
 web/node_modules/
 web/dist/
 web/.env
 web/.env.local
-web/dist/
 
 # IDE / OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Temp / local scripts
+stdout.log
+stderr.log
+stdout_w.log
+stderr_w.log
+run_hidden.vbs
+start_detached.py
